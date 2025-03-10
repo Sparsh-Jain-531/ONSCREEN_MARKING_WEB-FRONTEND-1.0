@@ -10,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // Register necessary chart elements with Chart.js
 ChartJS.register(
@@ -21,16 +22,20 @@ ChartJS.register(
   Legend
 );
 
-const BarChart = ({ realData }) => {
+const BarChart = () => {
 
   const [responseData, setResponseData] = useState([])
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`);
-      setResponseData(response.data)
+    try {
+      async function fetchData() {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`);
+        setResponseData(response.data)
+      }
+      fetchData();
+    } catch (error) {
+      toast.error(error?.message)
     }
-    fetchData();
   }, []);
 
   const dataSets = {

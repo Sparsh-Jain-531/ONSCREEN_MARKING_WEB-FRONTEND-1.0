@@ -1,23 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { Doughnut } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Chart as ChartJS, ArcElement, Title, Tooltip, Legend } from "chart.js";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // Register necessary chart elements with Chart.js
-ChartJS.register(
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(ArcElement, Title, Tooltip, Legend);
 
-const DoughnutChart = ({realData}) => {
+const DoughnutChart = ({ arr, val }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [responseData, setResponseData] = useState([]);
+  const [arrdata, setArrdata] = useState([]);
+  const [valdata, setValdata] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`
+        );
+        const responseData = response.data;
+
+        if (responseData?.usersByRole) {
+          const arrr = Object.keys(responseData.usersByRole);
+          const vall = Object.values(responseData.usersByRole);
+
+          setArrdata(arrr);
+          setValdata(vall);
+        }
+      } catch (error) {
+        toast.error(error?.message);
+      }
+    };
+
+    fetchData();
+  }, []); // Run only once when component mounts
 
   useEffect(() => {
     const checkDarkMode = () => {
@@ -29,7 +46,10 @@ const DoughnutChart = ({realData}) => {
 
     // Add event listener for theme changes
     const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => {
       observer.disconnect();
@@ -38,10 +58,18 @@ const DoughnutChart = ({realData}) => {
 
   // Doughnut chart data
   const data = {
-    labels: realData?.labels || ["Admin", "Evaluator", "Moderator"], // Labels for the chart
+    labels:
+      arr.length <= 0
+        ? arrdata.length <= 0
+          ? ["Loading..."]
+          : arrdata
+        : arr, // Labels for the chart
     datasets: [
       {
-        data: realData?.data || [10, 15, 20], // Values for the chart
+        // here i take data from parent component (arr, val). but these data comes when parent component handleBoxClick() is called on click action. so initially until user click on any box i use useeffect to fetch user data and show it default data initially (arrdata, valdata)  the working of arr, val in parent component is same arrdata, valdata which is used in this component.
+
+        data:
+          val.length <= 0 ? (valdata.length <= 0 ? [5, 5, 5] : valdata) : val, // Values for the chart
         backgroundColor: [
           "rgba(255, 99, 132, 0.6)", // Red
           "rgba(54, 162, 235, 0.6)", // Blue
@@ -67,21 +95,21 @@ const DoughnutChart = ({realData}) => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'bottom',
+        position: "bottom",
         labels: {
           font: {
             size: 14,
           },
-          color: isDarkMode ? 'white' : 'black',
+          color: isDarkMode ? "white" : "black",
         },
       },
       title: {
         display: true,
-        text: 'Category-Wise Distribution',
+        text: "Category-Wise Distribution",
         font: {
           size: 18,
         },
-        color: isDarkMode ? 'white' : 'black',
+        color: isDarkMode ? "white" : "black",
       },
       animation: {
         duration: 300, // Controls animation duration (in milliseconds)

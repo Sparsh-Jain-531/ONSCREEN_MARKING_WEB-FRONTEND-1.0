@@ -11,22 +11,15 @@ import { IoBookSharp } from "react-icons/io5";
 import { MdLibraryBooks } from "react-icons/md";
 import { BsClipboard2DataFill } from "react-icons/bs";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const [expandedChart, setExpandedChart] = useState(null);
   const [showData, setShowData] = useState(false);
   const [selectedChartData, setSelectedChartData] = useState(null);
   const [responseData, setResponseData] = useState([]);
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`
-      );
-      setResponseData(response.data);
-    }
-    fetchData();
-  }, []);
+  const [arr, setArr] = useState([]);
+  const [val, setVal] = useState([]);
 
   const dataSets = {
     Users: { labels: ["Admin", "Evaluator", "Moderator"], data: [10, 15, 20] },
@@ -55,8 +48,105 @@ const Dashboard = () => {
   );
 
   const handleBoxClick = (title) => {
-    setSelectedChartData(dataSets[title]);
+
+    if (title === "Users") {
+
+      let arrr = [];
+      let vall = [];
+      for (const key in responseData.usersByRole) {
+        arrr.push(key);
+      }
+      for (const key in responseData.usersByRole) {
+        vall.push(responseData.usersByRole[key]);
+      }
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "Tasks") {
+
+      let arrr = [];
+      let vall = [];
+      for (const key in responseData.tasksByStatus) {
+        arrr.push(key);
+      }
+      for (const key in responseData.tasksByStatus) {
+        vall.push(responseData.tasksByStatus[key]);
+      }
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "Courses") {
+
+      let arrr = [];
+      let vall = [];
+      arrr.push(title);
+      vall.push(responseData.totalCourses);
+      setArr(arrr);
+      setVal(vall);
+      
+    } else if (title === "Subjects") {
+
+      let arrr = [];
+      let vall = [];
+      arrr.push(title);
+      vall.push(responseData.totalSubjects);
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "Schemas") {
+
+      let arrr = [];
+      let vall = [];
+      arrr = ["Schema A", "Schema B", "Schema C"];
+      vall = [5, 8, 12];
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "Classes") {
+
+      let arrr = [];
+      let vall = [];
+      arrr = ["Class 1", "Class 2", "Class 3"];
+      vall = [25, 30, 40];
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "ScannedData") {
+
+      let arrr = [];
+      let vall = [];
+      arrr = ["Scanned Data"];
+      vall = [150];
+      setArr(arrr);
+      setVal(vall);
+
+    } else if (title === "ResultGenerated") {
+
+      let arrr = [];
+      let vall = [];
+      arrr = ["Results Generated"];
+      vall = [100];
+      setArr(arrr);
+      setVal(vall);
+
+    } else {
+      setSelectedChartData(dataSets[title]);
+    }
   };
+
+  useEffect(() => {
+    try {
+      async function fetchData() {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`
+        );
+        setResponseData(response.data);
+      }
+      fetchData();
+    } catch (error) {
+      toast.error(error?.message);
+    }
+  }, [arr, val]);
 
   const openChart = (chartType) => {
     setExpandedChart(chartType);
@@ -100,7 +190,7 @@ const Dashboard = () => {
           title={"Subjects"}
           amount={responseData.totalSubjects}
           // percentage={45}
-          event={() => handleBoxClick("Booklets")}
+          event={() => handleBoxClick("Subjects")}
         />
         {showData && (
           <>
@@ -162,7 +252,7 @@ const Dashboard = () => {
           className="bar w-full cursor-pointer rounded-xl border-blue-300 bg-white p-4 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-100 hover:border hover:shadow-xl dark:bg-navy-700 dark:shadow-gray-800 md:w-full lg:w-7/12"
         >
           <div className="flex h-72 items-center justify-center sm:h-80 md:h-96">
-            <BarChart realData={selectedChartData} />
+            <BarChart />
           </div>
         </div>
 
@@ -172,7 +262,7 @@ const Dashboard = () => {
           className="line w-full cursor-pointer rounded-xl border-blue-300 bg-white p-4 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-100 hover:border hover:shadow-xl dark:bg-navy-700 dark:shadow-gray-800 md:w-full lg:w-5/12"
         >
           <div className="flex h-72 justify-center sm:h-80 md:h-96">
-            <DoughnutChart realData={selectedChartData} />
+            <DoughnutChart arr={arr} val={val} />
           </div>
         </div>
       </div>
@@ -187,12 +277,10 @@ const Dashboard = () => {
             className="w-11/12 max-w-4xl rounded-lg bg-white p-6 dark:bg-navy-800"
             onClick={(e) => e.stopPropagation()}
           >
-            {expandedChart === "bar" && (
-              <BarChart realData={selectedChartData} />
-            )}
+            {expandedChart === "bar" && <BarChart />}
             {expandedChart === "doughnut" && (
               <div className="flex items-center justify-center sm:mx-auto md:mx-auto md:w-1/2 lg:mx-auto lg:w-1/2">
-                <DoughnutChart realData={selectedChartData} />
+                <DoughnutChart arr={arr} val={val} />
               </div>
             )}
           </div>
