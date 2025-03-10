@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import axios from "axios";
 
 // Register necessary chart elements with Chart.js
 ChartJS.register(
@@ -21,21 +22,33 @@ ChartJS.register(
 );
 
 const BarChart = ({ realData }) => {
+
+  const [responseData, setResponseData] = useState([])
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`);
+      setResponseData(response.data)
+    }
+    fetchData();
+  }, []);
+
   const dataSets = {
-    Users: { labels: ["Admin", "Evaluator", "Moderator"], data: [10, 15, 20] },
+    Users: { labels: ["Admin", "Evaluator", "Moderator"], data: [responseData.totalUsers] },
     Tasks: {
       labels: ["Pending", "Completed", "In Progress"],
-      data: [20, 50, 10],
+      data: [responseData.totalTasks],
     },
-    Schemas: { labels: ["Schema A", "Schema B", "Schema C"], data: [5, 8, 12] },
-    Classes: { labels: ["Class 1", "Class 2", "Class 3"], data: [25, 30, 40] },
-    Courses: { labels: ["Math", "Science", "English"], data: [12, 20, 15] },
-    Booklets: { labels: ["Booklet A", "Booklet B"], data: [100, 150] },
+    // Schemas: { labels: ["Schema A", "Schema B", "Schema C"], data: [5, 8, 12] },
+    Courses: { labels: ["Math", "Science", "English"], data: [responseData.totalCourses] },
+    Subjects: { labels: ["Class 1", "Class 2", "Class 3"], data: [responseData.totalSubjects] },
+    // Booklets: { labels: ["Booklet A", "Booklet B"], data: [100, 150] },
     // ResultGenerated: { labels: ["Results Generated"], data: [100] },
     // ScannedData: { labels: ["Scanned Data"], data: [150] },
   };
 
   const labels = Object.keys(dataSets);
+  
 
   // Generate dataset dynamically by summing up the `data` array for each category
   const processedData = labels.map((category) =>

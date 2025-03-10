@@ -10,13 +10,23 @@ import { SiGoogleclassroom } from "react-icons/si";
 import { IoBookSharp } from "react-icons/io5";
 import { MdLibraryBooks } from "react-icons/md";
 import { BsClipboard2DataFill } from "react-icons/bs";
+import axios from "axios";
 
 const Dashboard = () => {
-  useEffect(() => {}, []);
-
   const [expandedChart, setExpandedChart] = useState(null);
   const [showData, setShowData] = useState(false);
   const [selectedChartData, setSelectedChartData] = useState(null);
+  const [responseData, setResponseData] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/analytic/getadminanalytics`
+      );
+      setResponseData(response.data);
+    }
+    fetchData();
+  }, []);
 
   const dataSets = {
     Users: { labels: ["Admin", "Evaluator", "Moderator"], data: [10, 15, 20] },
@@ -67,30 +77,30 @@ const Dashboard = () => {
         <Boxes
           icon={<FaUsers fontSize={36} />}
           title={"Users"}
-          amount={processedData[0]}
+          amount={responseData.totalUsers}
           // percentage={100}
           event={() => handleBoxClick("Users")}
         />
         <Boxes
-          icon={<MdOutlineScanner fontSize={36} />}
-          title={"Scanned Data"}
-          amount={processedData[1]}
-          // percentage={45}
-          event={() => handleBoxClick("ScannedData")}
-        />
-        <Boxes
           icon={<FaTasks fontSize={36} />}
           title={"Tasks"}
-          amount={processedData[2]}
+          amount={responseData.totalTasks}
           // percentage={45}
           event={() => handleBoxClick("Tasks")}
         />
         <Boxes
-          icon={<RiAiGenerate fontSize={36} />}
-          title={"Result Generated"}
-          amount={processedData[3]}
+          icon={<IoBookSharp fontSize={36} />}
+          title={"Courses"}
+          amount={responseData.totalCourses}
           // percentage={45}
-          event={() => handleBoxClick("ResultGenerated")}
+          event={() => handleBoxClick("Courses")}
+        />
+        <Boxes
+          icon={<MdLibraryBooks fontSize={36} />}
+          title={"Subjects"}
+          amount={responseData.totalSubjects}
+          // percentage={45}
+          event={() => handleBoxClick("Booklets")}
         />
         {showData && (
           <>
@@ -110,18 +120,18 @@ const Dashboard = () => {
               event={() => handleBoxClick("Classes")}
             />
             <Boxes
-              icon={<IoBookSharp fontSize={36} />}
-              title={"Courses"}
-              amount={processedData[6]}
+              icon={<MdOutlineScanner fontSize={36} />}
+              title={"Scanned Data"}
+              amount={processedData[1]}
               // percentage={45}
-              event={() => handleBoxClick("Courses")}
+              event={() => handleBoxClick("ScannedData")}
             />
             <Boxes
-              icon={<MdLibraryBooks fontSize={36} />}
-              title={"Booklets"}
-              amount={processedData[7]}
+              icon={<RiAiGenerate fontSize={36} />}
+              title={"Result Generated"}
+              amount={processedData[3]}
               // percentage={45}
-              event={() => handleBoxClick("Booklets")}
+              event={() => handleBoxClick("ResultGenerated")}
             />
             {/* </div> */}
           </>
